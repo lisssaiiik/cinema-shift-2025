@@ -144,14 +144,53 @@ body {
     white-space: nowrap;
 }
 
+/*Стили для film.html*/
+.certain-film-container {
+    display: flex;
+    align-items: center;
+    margin-left: 120px;
+    margin-top: 30px;
+    align-items: flex-start;
+}
 
+.genre-page-for-certain-film {
+    position: absolute;
+    top: 253px;
+    /* Положение жанра */
+    left: 195px;
+    color: black;
+    z-index: 3;
+    font-size: 0.7em;
+}
 
+.countryAndFilm-page-for-certain-film {
+    position: absolute;
+    top: 273px;
+    left: 195px;
+    color: black;
+    z-index: 3;
+    font-size: 0.6em;
+    white-space: nowrap;
+}
 
+.movie-info-container {
+    width: 600px;
+    height: 600px;
+    margin-left: 20px;
+    margin-top: 0px;
+    display: flex;
+    flex-direction: column;
+    text-align: justify;
+}
 
+.movie-subtitle-for-certain-film {
+    font-size: 1em;
+    color: #777;
+    margin-bottom: 18px;
+    text-align: left;
+    margin-top: 0;
+}
 
-
-
-
-  
-
-
+.movie-actors-for-certain-film {
+    margin-top: 0;
+}
