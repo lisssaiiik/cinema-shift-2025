@@ -1,26 +1,25 @@
-document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        const response = await fetch('https://shift-intensive.ru/api/cinema/today', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (!response.ok) throw new Error('Ошибка получения данных');
-
-        const data = await response.json();
-
-        if (data.success) {
-            const films = data.films;
-            const filmsHtml = createFilmsList(films);
-            document.querySelector('.movies-container').innerHTML = filmsHtml;
-        } else {
-            document.querySelector('.movies-container').innerHTML = '<p>Ошибка получения данных.</p>';
-        }
-    } catch (error) {
-        document.querySelector('.movies-container').innerHTML = `<p>Произошла ошибка: ${error.message}</p>`;
+fetch(TODAY_API_URL, {
+    method: 'GET',
+    headers: {
+        'Accept': 'application/json'
     }
+})
+.then(response => {
+    if (!response.ok) throw new Error('Ошибка получения данных');
+
+    return response.json();
+})
+.then(data => {
+    if (data.success) {
+        const films = data.films;
+        const filmsHtml = createFilmsList(films);
+        document.querySelector('.movies-container').innerHTML = filmsHtml;
+    } else {
+        document.querySelector('.movies-container').innerHTML = '<p>Ошибка получения данных.</p>';
+    }
+})
+.catch(error => {
+    document.querySelector('.movies-container').innerHTML = `<p>Произошла ошибка: ${error.message}</p>`;
 });
 
 const RatingMap = {
@@ -41,14 +40,13 @@ function createFilmsList(films) {
     let filmsHtml = '';
 
     films.slice(0, 10).forEach((film) => {
-        const rawRating = film.ageRating || 'N/A';
-        const ageRating = RatingMap[rawRating] || 'N/A';
-        const kinopoiskRating = film.userRatings?.kinopoisk || 'N/A';
-        const baseUrl = 'https://shift-intensive.ru/api';
-        const imageUrl = film.img ? `${baseUrl}${film.img}` : 'assets/filmPage/default.jpg';
+        const rawRating = film.ageRating;
+        const ageRating = RatingMap[rawRating];
+        const kinopoiskRating = film.userRatings?.kinopoisk;
+        const imageUrl = `${BASE_URL}${film.img}`;
         const starRatingSrc = getStarRating(kinopoiskRating);
-        const genre = film.genres[0] || 'N/A';
-        const countryName = film.country?.name || 'N/A';
+        const genre = film.genres[0];
+        const countryName = film.country?.name;
         const filmYear = film.releaseDate.split(" ").pop();
 
         filmsHtml += `
