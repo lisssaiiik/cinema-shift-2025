@@ -4,8 +4,9 @@ if (filmId) {
     fetchFilmData(filmId);
     fetchFilmSchedule(filmId);
 } else {
-    alert("Не указан ID фильма.");
+    console.log("Не указан ID фильма.");
 }
+
 const RatingMap = {
     'G': '0+',
     'PG': '6+',
@@ -20,18 +21,8 @@ function fetchFilmData(filmId) {
         method: 'GET',
         headers: { 'accept': 'application/json' }
     })
-    .then(response => response.json())
-    .then(response => {
-        if (response.success) {
-            const film = response.film;
-            renderFilmDetails(film);
-        } else {
-            alert("Ошибка: " + response.reason);
-        }
-    })
-    .catch(() => {
-        alert("Произошла ошибка при загрузке данных о фильме.");
-    });
+        .then(response => response.json())
+        .then(response => renderFilmDetails(response.film));
 }
 
 function renderFilmDetails(film) {
@@ -79,20 +70,10 @@ function getStarRating(kinopoiskRating) {
 function fetchFilmSchedule(filmId) {
     fetch(FILM_SCHEDULE_URL.replace('{filmId}', filmId), {
         method: 'GET',
-        headers: {
-            'accept': 'application/json'
-        }
+        headers: { 'accept': 'application/json' }
     })
-    .then(handleResponse)
-    .then(renderSchedules)
-    .catch(handleError);
-}
-
-function handleResponse(response) {
-    if (!response.ok) {
-        throw new Error('Ошибка: ' + response.status);
-    }
-    return response.json();
+        .then(response => response.json())
+        .then(renderSchedules);
 }
 
 function renderSchedules(data) {
@@ -127,14 +108,7 @@ function renderSchedules(data) {
 
 function formatDate(dateString) {
     const [day, month, year] = dateString.split('.');
-    const fullYear = `20${year}`;
-    const formattedDateString = `${fullYear}-${month}-${day}`;
-    const date = new Date(formattedDateString);
-    if (!isNaN(date)) {
-        const options = { weekday: 'short', day: 'numeric', month: 'short' };
-        return date.toLocaleDateString('ru-RU', options);
-    }
-    return null;
+    return new Date(`${`20${year}`}-${month}-${day}`).toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
 function translateHallName(hallName) {
@@ -145,14 +119,12 @@ function translateHallName(hallName) {
             return 'Зелёный';
         case 'Blue':
             return 'Голубой';
-        default:
-            return hallName;
     }
 }
 
 function renderSeances(schedule) {
     let seancesHtml = '';
-    
+
     const halls = schedule.seances.reduce((acc, seance) => {
         const hallName = seance.hall.name;
         if (!acc[hallName]) {
@@ -165,33 +137,25 @@ function renderSeances(schedule) {
     for (const hallName in halls) {
         const translatedHallName = `${translateHallName(hallName)} зал`;
         const times = halls[hallName];
-        
+
         seancesHtml += `<div class="hall-info">
                             <h4>${translatedHallName}</h4>
                             <div class="time-list">`;
-        
-        times.forEach((time, index) => {
+
+        times.forEach((time) => {
             seancesHtml += `<div class="time-cell" data-selected="false" data-time="${time}">${time}</div>`;
         });
-        
+
         seancesHtml += `</div></div>`;
     }
-    
+
     seancesHtml += '<button class="button-to-continue-operations">Продолжить</button>';
 
-    const seancesContainer = document.querySelector('.seances-container');
-    if (!seancesContainer) {
-        const newSeancesContainer = document.createElement('div');
-        newSeancesContainer.classList.add('seances-container');
-        newSeancesContainer.innerHTML = seancesHtml;
-        document.querySelector('.schedule-container').appendChild(newSeancesContainer);
-    } else {
-        seancesContainer.innerHTML = seancesHtml;
-    }
+    document.querySelector('.seances-container').innerHTML = seancesHtml;
 
     const timeCells = document.querySelectorAll('.time-cell');
     timeCells.forEach(cell => {
-        cell.addEventListener('click', function(event) {
+        cell.addEventListener('click', function (event) {
             const selectedTimeCell = event.target;
             timeCells.forEach(cell => {
                 cell.dataset.selected = false;
@@ -199,7 +163,4 @@ function renderSeances(schedule) {
             selectedTimeCell.dataset.selected = true;
         });
     });
-}
-function handleError(error) {
-    alert("Произошла ошибка при загрузке данных о фильме: " + error.message);
 }
