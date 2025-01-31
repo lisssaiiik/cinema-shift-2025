@@ -134,7 +134,7 @@ body {
 .genre {   
     position: absolute;   
     top: 253px;
-    left: 230px;   
+    left: 221px;   
     color: black;   
     z-index: 3;   
     font-size: 0.7em;   
@@ -144,7 +144,7 @@ body {
 .countryAndFilm {  
     position: absolute; 
     top: 273px;
-    left: 230px; 
+    left: 221px; 
     color: black;   
     z-index: 3;   
     font-size: 0.6em;
