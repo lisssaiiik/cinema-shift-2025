@@ -1,14 +1,11 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const params = new URLSearchParams(window.location.search);
-    const filmId = params.get('id');
-    if (filmId) {
-        fetchFilmData(filmId);
-        fetchFilmSchedule(filmId);
-    } else {
-        alert("Не указан ID фильма.");
-    }
-});
-
+const params = new URLSearchParams(window.location.search);
+const filmId = params.get('id');
+if (filmId) {
+    fetchFilmData(filmId);
+    fetchFilmSchedule(filmId);
+} else {
+    alert("Не указан ID фильма.");
+}
 const RatingMap = {
     'G': '0+',
     'PG': '6+',
@@ -19,7 +16,7 @@ const RatingMap = {
 };
 
 function fetchFilmData(filmId) {
-    fetch(`https://shift-intensive.ru/api/cinema/film/${filmId}`, {
+    fetch(`${FILM_URL}${filmId}`, {
         method: 'GET',
         headers: { 'accept': 'application/json' }
     })
@@ -40,16 +37,15 @@ function fetchFilmData(filmId) {
 function renderFilmDetails(film) {
     let filmHtml = '';
 
-    const rawRating = film.ageRating || 'N/A';
-    const ageRating = RatingMap[rawRating] || 'N/A';
-    const kinopoiskRating = film.userRatings.kinopoisk || 'N/A';
-    const baseUrl = 'https://shift-intensive.ru/api';
-    const imageUrl = (film.img) ? `${baseUrl}${film.img}` : 'assets/filmPage/default.jpg';
+    const rawRating = film.ageRating;
+    const ageRating = RatingMap[rawRating];
+    const kinopoiskRating = film.userRatings.kinopoisk;
+    const imageUrl = `${BASE_URL}${film.img}`;
     const starRatingSrc = getStarRating(kinopoiskRating);
     const genre = film.genres[0];
     const countryName = film.country.name;
     const filmYear = film.releaseDate.split(" ").pop();
-    const actors = film.actors.map(actor => actor.fullName).join(', ') || "Не указано";
+    const actors = film.actors.map(actor => actor.fullName).join(', ');
 
     filmHtml += `
         <div class="movie-card">
@@ -81,7 +77,7 @@ function getStarRating(kinopoiskRating) {
 }
 
 function fetchFilmSchedule(filmId) {
-    fetch(`https://shift-intensive.ru/api/cinema/film/${filmId}/schedule`, {
+    fetch(FILM_SCHEDULE_URL.replace('{filmId}', filmId), {
         method: 'GET',
         headers: {
             'accept': 'application/json'
@@ -116,7 +112,6 @@ function renderSchedules(data) {
 
         filmHtml += '</div>';
         document.querySelector('.schedule-container').innerHTML = filmHtml;
-        // Обработчик кликов по кнопкам с датами
         const dateButtons = document.querySelectorAll('.schedule-button');
         dateButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -135,14 +130,13 @@ function formatDate(dateString) {
     const fullYear = `20${year}`;
     const formattedDateString = `${fullYear}-${month}-${day}`;
     const date = new Date(formattedDateString);
-    if (!isNaN(date)) { // Проверка на корректность даты
+    if (!isNaN(date)) {
         const options = { weekday: 'short', day: 'numeric', month: 'short' };
         return date.toLocaleDateString('ru-RU', options);
     }
     return null;
 }
 
-// Функция перевода названий залов
 function translateHallName(hallName) {
     switch (hallName) {
         case 'Red':
@@ -159,7 +153,6 @@ function translateHallName(hallName) {
 function renderSeances(schedule) {
     let seancesHtml = '';
     
-    // Перебираем все залы для выбранной даты
     const halls = schedule.seances.reduce((acc, seance) => {
         const hallName = seance.hall.name;
         if (!acc[hallName]) {
@@ -169,7 +162,6 @@ function renderSeances(schedule) {
         return acc;
     }, {});
 
-    // Выводим список сеансов
     for (const hallName in halls) {
         const translatedHallName = `${translateHallName(hallName)} зал`;
         const times = halls[hallName];
@@ -197,7 +189,6 @@ function renderSeances(schedule) {
         seancesContainer.innerHTML = seancesHtml;
     }
 
-    // нажатия на ячейки со временем
     const timeCells = document.querySelectorAll('.time-cell');
     timeCells.forEach(cell => {
         cell.addEventListener('click', function(event) {
